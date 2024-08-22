@@ -7,19 +7,10 @@ const multer = require("multer");
 const { error, trace } = require("console");
 const app = express();
 const mongoose = require("mongoose");
+const Product = require("./models/Product");
+const db = require("./db.js")
 
 //db connection
-const mongoURL = "mongodb://localhost:27017/ecommerce";
-const db = mongoose.connection;
-mongoose.connect(mongoURL);
-
-db.on("connected", () => {
-  console.log("Connected to Database");
-});
-
-db.on("error", (err) => {
-  console.log("Refused to connect to database" + err);
-});
 
 app.use(express.json()); //with this request that we will get from response that will be automatically passed through json
 app.use(cors());
@@ -46,44 +37,18 @@ app.post("/upload", upload.single("product"), (req, res) => {
     image_url: `http://localhost:${port}/images/${req.file.filename}`,
   });
 });
-//Schema for creating product
-const Prodcut = mongoose.model("Prodcut", {
-  id: {
-    type: Number,
-    required: true,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  image: {
-    type: String,
-    required: true,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
-  new_price: {
-    type: Number,
-    required: true,
-  },
-  old_price: {
-    type: Number,
-    required: true,
-  },
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-  available: {
-    type: Boolean,
-    default: true,
-  },
-});
 app.post("/addproduct", async (req, res) => {
-  const product = new Prodcut({
-    id: req.body.id,
+  let products = await Product.find({});
+  let id;
+  if (products.length > 0) {
+    let last_product_array = products.slice(-1);
+    let last_product = last_product_array[0];
+    id = last_product.id + 1;
+  } else {
+    id = 1;
+  }
+  const product = new Product({
+    id: id,
     name: req.body.name,
     image: req.body.image,
     category: req.body.category,
@@ -98,6 +63,23 @@ app.post("/addproduct", async (req, res) => {
     name: req.body.name,
   });
 });
+//for removing product
+app.post("/removeproduct", async (req, res) => {
+  await Product.findOneAndDelete({ id: req.body.id });
+  console.log("removed from db");
+  res.json({
+    sucess: true,
+    name: req.body.name,
+  });
+});
+//Creating api for getting all products
+app.get('/allproducts',async (req,res) =>{
+  let products = await Product.find({})
+  console.log("All products fetched")
+  res.send(products)
+
+})
+//TODO:from 5:55:00 
 
 //Api creation
 app.listen(port, (error) => {
@@ -107,3 +89,4 @@ app.listen(port, (error) => {
     console.log("Error" + error);
   }
 });
+
