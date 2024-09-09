@@ -39,29 +39,73 @@ app.post("/upload", upload.single("product"), (req, res) => {
   });
 });
 app.post("/addproduct", async (req, res) => {
-  let products = await Product.find({});
-  let id;
-  if (products.length > 0) {
-    let last_product_array = products.slice(-1);
-    let last_product = last_product_array[0];
-    id = last_product.id + 1;
-  } else {
-    id = 1;
+  try {
+    // Generate a unique ID (if needed)
+    let products = await Product.find({});
+    let id;
+    if (products.length > 0) {
+      let last_product = products[products.length - 1];
+      id = last_product.id + 1;
+    } else {
+      id = 1;
+    }
+
+    // Create a new product instance
+    const product = new Product({
+      id: id,
+      name: req.body.name,
+      image: req.body.image,
+      category: req.body.category,
+      new_price: req.body.new_price,
+      old_price: req.body.old_price,
+      available: true, // Set to default true
+      date: Date.now(), // Set to current date
+    });
+
+    // Save the product to the database
+    await product.save();
+    console.log("Product saved successfully");
+
+    // Send back a success response
+    res.json({
+      success: true,
+      name: product.name,
+    });
+  } catch (error) {
+    console.error("Error saving product:", error);
+
+    // Send back an error response
+    res.status(500).json({
+      success: false,
+      message: "Failed to save the product",
+      error: error.message,
+    });
   }
-  const product = new Product({
-    id: id,
-    name: req.body.name,
-    image: req.body.image,
-    category: req.body.category,
-    new_price: req.body.new_price,
-    old_price: req.body.old_price,
-  });
-  console.log("saved");
-  res.json({
-    // sucess: true,
-    name: req.body.name,
-  });
 });
+// app.post("/addproduct", async (req, res) => {
+//   let products = await Product.find({});
+//   let id;
+//   if (products.length > 0) {
+//     let last_product_array = products.slice(-1);
+//     let last_product = last_product_array[0];
+//     id = last_product.id + 1;
+//   } else {
+//     id = 1;
+//   }
+//   const product = new Product({
+//     id: id,
+//     name: req.body.name,
+//     image: req.body.image,
+//     category: req.body.category,
+//     new_price: req.body.new_price,
+//     old_price: req.body.old_price,
+//   });
+//   console.log("saved");
+//   res.json({
+//     // sucess: true,
+//     name: req.body.name,
+//   });
+// });
 //for removing product
 app.post("/removeproduct", async (req, res) => {
   await Product.findOneAndDelete({ id: req.body.id });
