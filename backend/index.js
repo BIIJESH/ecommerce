@@ -8,7 +8,8 @@ const { error, trace } = require("console");
 const app = express();
 const mongoose = require("mongoose");
 const Product = require("./models/Product");
-const db = require("./db.js")
+const db = require("./db.js");
+const { request } = require("https");
 
 //db connection
 
@@ -55,11 +56,9 @@ app.post("/addproduct", async (req, res) => {
     new_price: req.body.new_price,
     old_price: req.body.old_price,
   });
-  console.log(product);
-  await product.save();
   console.log("saved");
   res.json({
-    sucess: true,
+    // sucess: true,
     name: req.body.name,
   });
 });
@@ -79,7 +78,6 @@ app.get('/allproducts',async (req,res) =>{
   res.send(products)
 
 })
-//TODO:from 5:55:00 
 
 //Api creation
 app.listen(port, (error) => {
