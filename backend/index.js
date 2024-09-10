@@ -179,3 +179,5 @@ app.listen(port, (error) => {
     console.log("Error" + error);
   }
 });
+//TODO: from 7:49:45
+//TODO: fix the routes in different folder
