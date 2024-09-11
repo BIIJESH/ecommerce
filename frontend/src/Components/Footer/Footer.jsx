@@ -36,7 +36,6 @@ const Footer = () => {
       </div>
     </div>
   );
-    //TODO:from 1:22:28
 };
 
 export default Footer;

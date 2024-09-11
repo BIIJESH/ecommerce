@@ -10,7 +10,6 @@ const Breadcrum = (props) => {
       {product.category} <img src={arrow_icon} alt="" /> {product.name}
 
     </div>
-    //FIXME:Breadcrum component is not being rendered issue might be the data is not coming from shopContext
   );
 };
 
