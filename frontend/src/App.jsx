@@ -7,6 +7,7 @@ import ShopCategory from "./Pages/ShopCategory";
 import Cart from "./Pages/Cart";
 import LoginSignup from "./Pages/LoginSignup";
 import Product from "./Pages/Product";
+import Footer from "./Components/Footer/Footer";
 
 function App() {
   return (
@@ -24,10 +25,11 @@ function App() {
           <Route path="/login" element={<LoginSignup />} />
           <Route />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </div>
   );
 }
 
 export default App;
-
+//TODO:32:20
