@@ -10,7 +10,9 @@ const Navbar = () => {
     <div className="navbar">
       <div className="nav-logo">
         <img src={logo} alt="" />
-        <p>LUXIFY</p>
+        <Link to="/" style={{ textDecoration: "none" }}>
+          <p> LUXIFY</p>
+        </Link>
       </div>
       <ul className="nav-menu">
         <li
