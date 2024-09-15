@@ -1,9 +1,9 @@
 import "./AddProduct.css";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import upload_area from "../../assets/upload_area.svg";
 
 const AddProduct = () => {
-  const [image, setImage] = useState(false);
+  const [image, setImage] = useState(null);
   const [productDetails, setProductsDetails] = useState({
     name: "",
     image: "",
@@ -11,18 +11,22 @@ const AddProduct = () => {
     new_price: "",
     old_price: "",
   });
+
   const imageHandler = (e) => {
     setImage(e.target.files[0]);
   };
+
   const changeHandler = (e) => {
     setProductsDetails({ ...productDetails, [e.target.name]: e.target.value });
   };
+
   const addProduct = async () => {
     console.log(productDetails);
     let responseData;
     let product = productDetails;
     let formData = new FormData();
     formData.append("product", image);
+
     await fetch("http://localhost:4000/upload", {
       method: "POST",
       headers: {
@@ -34,6 +38,7 @@ const AddProduct = () => {
       .then((data) => {
         responseData = data;
       });
+
     if (responseData.success) {
       product.image = responseData.image_url;
       console.log(product);
@@ -47,14 +52,28 @@ const AddProduct = () => {
       })
         .then((resp) => resp.json())
         .then((data) => {
-          data.success ? alert("Product Added") : alert("Failed");
+          if (data.success) {
+            alert("Product Added");
+            // Clear input fields and reset state
+            setProductsDetails({
+              name: "",
+              image: "",
+              category: "women",
+              new_price: "",
+              old_price: "",
+            });
+            setImage(null);
+          } else {
+            alert("Failed to add product");
+          }
         });
     }
   };
+
   return (
     <div className="add-product">
       <div className="addproduct-itemfield">
-        <p>Prodcut Title</p>
+        <p>Product Title</p>
         <input
           value={productDetails.name}
           onChange={changeHandler}
@@ -91,7 +110,6 @@ const AddProduct = () => {
           value={productDetails.category}
           onChange={changeHandler}
           name="category"
-          id=""
           className="add-product-selector"
         >
           <option value="women">Women</option>
@@ -103,7 +121,7 @@ const AddProduct = () => {
         <label htmlFor="file-input">
           <img
             src={image ? URL.createObjectURL(image) : upload_area}
-            className="addproduct-thumbnail-img "
+            className="addproduct-thumbnail-img"
             alt=""
           />
         </label>
@@ -124,9 +142,8 @@ const AddProduct = () => {
         ADD
       </button>
     </div>
-  );
     //TODO:from 7:25:01
+  );
 };
 
 export default AddProduct;
-

@@ -7,10 +7,10 @@ import DescriptionBox from "../Components/DescriptionBox/DescriptionBox";
 import RelatedProducts from "../Components/RelatedProducts/RelatedProducts";
 
 const Product = () => {
-  const { allproduct } = useContext(ShopContext);
-  console.log(allproduct);
+  const { all_product } = useContext(ShopContext);
+  console.log(all_product);
   const { productId } = useParams();
-  const product = allproduct.find((e) => e.id === Number(productId));
+  const product = all_product.find((e) => e.id === Number(productId));
   return (
     <div>
       <Breadcrum product={product} />
