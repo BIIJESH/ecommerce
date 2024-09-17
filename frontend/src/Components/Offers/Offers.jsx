@@ -4,11 +4,14 @@ import exculsive_image from "../Assets/exclusive_image.png";
 
 const Offers = () => {
   return (
-    <div className="offers">
+    <div className="container offers">
       <div className="offers-left">
-        <h1>Exclusive</h1>
-        <p>Offers For you</p>
-        <p>Only ON BEST SELLERS PRODUCTS</p>
+        <p>Just for You!</p>
+        <h1>An Exclusive Offers</h1>
+        <h6>
+          Discover unbeatable deals on our top-selling products, handpicked to
+          give you the best value.{" "}
+        </h6>
         <button>Check Now</button>
       </div>
       <div className="offers-right">
