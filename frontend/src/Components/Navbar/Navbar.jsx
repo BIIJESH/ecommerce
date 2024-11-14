@@ -71,6 +71,7 @@ const Navbar = () => {
         </li>
       </ul>
       <div className="nav-login-cart">
+        {localStorage.getItem('auth-token')}
         <Link to="/login">
           <button>Login</button>
         </Link>

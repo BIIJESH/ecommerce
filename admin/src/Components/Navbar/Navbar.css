@@ -8,9 +8,13 @@
   margin-bottom: 1px;
 }
 
-.navlogo {
-  width: 400px;
-}
+/* .navlogo { */
+/*   width: 300px; */
+/* } */
+
+/* .navlogo img { */
+/*   width: 40px; */
+/* } */
 
 .navProfile {
   width: 100px;
@@ -24,7 +28,8 @@
   .navlogo {
     width: 150px;
   }
-  .navProfile{
+
+  .navProfile {
     width: 60px;
   }
 }

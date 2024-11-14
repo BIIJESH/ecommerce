@@ -1,5 +1,6 @@
 .loginsignup {
   width: 100%;
+  border: 1px;
   height: 100vh;
   background: #fce3fe;
   padding-top: 100px;
@@ -9,12 +10,14 @@
   width: 580px;
   height: 00px;
   background: white;
-  margin: auto;
+  margin:auto ;
   padding: 40px 60px;
 }
 
 .loginsignup-container h1 {
   margin: 20px 0px;
+  margin-top: -30px;
+  text-align: center;
 }
 
 .loginsignup-fields {
@@ -22,6 +25,7 @@
   flex-direction: column;
   gap: 29px;
   margin-top: 30px;
+  margin-bottom: 20px;
 }
 
 .loginsignup-fields input {
@@ -32,6 +36,7 @@
   outline: none;
   color: #5c5c5c;
   font-size: 18px;
+
 }
 
 .loginsignup-container button {
@@ -39,7 +44,7 @@
   height: 72px;
   color: white;
   background: #ff4141;
-  margin-top: 30px;
+  margin-bottom: 30px;
   border: none;
   font-size: 24px;
   font-weight: 500;
@@ -47,10 +52,11 @@
 }
 
 .loginsignup-login {
-  margin-top: 20px;
+  margin-top: 40px;
   color: #5c5c5c;
   font-size: 18px;
   font-weight: 500;
+  cursor: pointer;
 }
 
 .loginsignup-container span {
