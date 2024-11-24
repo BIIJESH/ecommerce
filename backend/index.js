@@ -122,55 +122,111 @@ app.get("/allproducts", async (req, res) => {
   console.log("All products fetched");
   res.send(products);
 });
-//creating a user endpoint
+//creating a signup endpoint
 app.post("/signup", async (req, res) => {
+  // Email regex pattern for validation
+  const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailPattern.test(req.body.email)) {
+    return res.status(400).json({
+      success: false,
+      errors: "Invalid email format. Please provide a valid email.",
+    });
+  }
+
+  // Password validation pattern
+  const passwordPattern =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordPattern.test(req.body.password)) {
+    return res.status(400).json({
+      success: false,
+      errors:
+        "Password must be at least 8 characters long, containing an uppercase letter, a lowercase letter, a number, and a special character.",
+    });
+  }
+
+  // Check if passwords match
+  if (req.body.password !== req.body.confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      errors: "Passwords do not match.",
+    });
+  }
+
+  // Check if user already exists
   let check = await User.findOne({ email: req.body.email });
   if (check) {
     return res.status(400).json({
       success: false,
-      errors: "existing user found with same email address ",
+      errors: "User with this email already exists.",
     });
   }
+
+  // Create a new user if all checks pass
   let cart = {};
   for (let i = 0; i < 300; i++) {
     cart[i] = 0;
   }
+
   const user = new User({
     name: req.body.username,
     email: req.body.email,
     password: req.body.password,
     cartData: cart,
   });
+
   await user.save();
+
   const data = {
     user: {
       id: user.id,
     },
   };
+
+  // Generate JWT token
   const token = jwt.sign(data, "secret_ecom");
   res.json({ success: true, token });
 });
-//creating endpoint for user login
+
+//login endpoint
 app.post("/login", async (req, res) => {
+  // Find user by email
   let user = await User.findOne({ email: req.body.email });
-  if (user) {
-    const passCompare = req.body.password === user.password;
-    if (passCompare) {
-      const data = {
-        user: {
-          id: user.id,
-        },
-      };
-      const token = jwt.sign(data, "secret_ecom");
-      res.json({ success: true, token });
-    } else {
-      res.json({ success: false, errors: "Wrong password" });
-    }
+
+  // Check if the user exists
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      errors: "User with this email does not exist.",
+    });
+  }
+
+  // Compare entered password with the stored password
+  const passCompare = req.body.password === user.password;
+
+  // If password matches
+  if (passCompare) {
+    // Generate JWT token
+    const data = {
+      user: {
+        id: user.id,
+      },
+    };
+
+    const token = jwt.sign(data, "secret_ecom");
+
+    // Send success response with token
+    return res.json({
+      success: true,
+      token,
+    });
   } else {
-    res.json({ success: false, errors: "Wrong email ID " });
+    // If password does not match
+    return res.status(400).json({
+      success: false,
+      errors: "Incorrect password.",
+    });
   }
 });
-
 //Api creation
 app.listen(port, (error) => {
   if (!error) {
