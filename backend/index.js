@@ -11,6 +11,8 @@ const Product = require("./models/Product");
 const User = require("./models/User");
 const db = require("./db.js");
 const { request } = require("https");
+const { getCurves } = require("crypto");
+const { resolveNs } = require("dns");
 
 //db connection
 
@@ -83,30 +85,6 @@ app.post("/addproduct", async (req, res) => {
     });
   }
 });
-// app.post("/addproduct", async (req, res) => {
-//   let products = await Product.find({});
-//   let id;
-//   if (products.length > 0) {
-//     let last_product_array = products.slice(-1);
-//     let last_product = last_product_array[0];
-//     id = last_product.id + 1;
-//   } else {
-//     id = 1;
-//   }
-//   const product = new Product({
-//     id: id,
-//     name: req.body.name,
-//     image: req.body.image,
-//     category: req.body.category,
-//     new_price: req.body.new_price,
-//     old_price: req.body.old_price,
-//   });
-//   console.log("saved");
-//   res.json({
-//     // sucess: true,
-//     name: req.body.name,
-//   });
-// });
 //for removing product
 app.post("/removeproduct", async (req, res) => {
   await Product.findOneAndDelete({ id: req.body.id });
@@ -122,6 +100,25 @@ app.get("/allproducts", async (req, res) => {
   console.log("All products fetched");
   res.send(products);
 });
+
+app.get("/allproducts/:category", async (req, res) => {
+  try {
+    const category = req.params.category;
+    if (category == "kid" || category == "women" || category == "men") {
+      const response = await Product.find({ category: category });
+      console.log("category fetched", response);
+      res.status(200).json(response);
+    } else {
+      res.status(404).json({
+        error: "invalid category",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internnal server error" });
+  }
+});
+
 //creating a signup endpoint
 app.post("/signup", async (req, res) => {
   // Email regex pattern for validation
@@ -145,12 +142,12 @@ app.post("/signup", async (req, res) => {
   }
 
   // Check if passwords match
-  if (req.body.password !== req.body.confirmPassword) {
-    return res.status(400).json({
-      success: false,
-      errors: "Passwords do not match.",
-    });
-  }
+  // if (req.body.password !== req.body.confirmPassword) {
+  //   return res.status(400).json({
+  //     success: false,
+  //     errors: "Passwords do not match.",
+  //   });
+  // }
 
   // Check if user already exists
   let check = await User.findOne({ email: req.body.email });
@@ -227,6 +224,105 @@ app.post("/login", async (req, res) => {
     });
   }
 });
+//creating endpoint for new collection data
+app.get("/newcollections", async (req, res) => {
+  let products = await Product.find({});
+  let newcollection = products.slice(1).slice(-8);
+  console.log("New collection fetched");
+  res.send(newcollection);
+});
+//creating endpoint for popularinwoman section
+app.get("/popularinwomen", async (req, res) => {
+  let products = await Product.find({ category: "women" });
+  let popularinwomen = products.slice(0, 4);
+  console.log("popularinwomen fetched");
+  res.send(popularinwomen);
+});
+//creating middleware to fetch user
+const fetchUser = (req, res, next) => {
+  const token = req.header("auth-token");
+
+  // Check if token is provided
+  if (!token) {
+    return res
+      .status(401)
+      .send({ errors: "Please authenticate using a valid token" });
+  }
+
+  try {
+    // Verify the token
+    const data = jwt.verify(token, "secret_ecom");
+    req.user = data.user; // Attach user data to the request object
+    next(); // Pass control to the next middleware/handler
+  } catch (error) {
+    res
+      .status(401)
+      .send({ errors: "Invalid token, please authenticate again" });
+  }
+};
+//creating endpoint for sending cart data to db
+app.post("/addtocart", fetchUser, async (req, res) => {
+  try {
+    // Check if the user exists
+    const user = await User.findOne({ _id: req.user.id });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Initialize or increment the cart item count
+    const cartDataKey = `cartData.${req.body.itemId}`;
+    await User.findOneAndUpdate(
+      { _id: req.user.id },
+      {
+        $inc: { [cartDataKey]: 1 }, // Increment the item count by 1
+      },
+      { upsert: true, new: true }, // Create the item if it doesn't exist
+    );
+
+    res.send("Added");
+    console.log(req.body, req.user);
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+//get cart endpoint
+app.post("/getcart", fetchUser, async (req, res) => {
+  console.log("GetCart");
+  let userData = await User.findOne({ _id: req.user.id });
+  res.json(userData.cartData);
+});
+// Endpoint to remove an item from the cart
+
+app.post("/removefromcart", fetchUser, async (req, res) => {
+  const { itemId } = req.body;
+  try {
+    // Find the user and update the cart data
+    let userData = await User.findOne({ _id: req.user.id });
+
+    // Decrement the cart data for the item
+    if (userData.cartData[itemId] > 0) {
+      userData.cartData[itemId] -= 1;
+    }
+
+    // If the quantity is 0, remove the item from the cart
+    if (userData.cartData[itemId] === 0) {
+      delete userData.cartData[itemId];
+    }
+
+    // Save the updated cart data
+    await User.findOneAndUpdate(
+      { _id: req.user.id },
+      { cartData: userData.cartData },
+    );
+
+    res.send({ success: true, message: "Item removed from cart" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: "Server error" });
+  }
+});
+
 //Api creation
 app.listen(port, (error) => {
   if (!error) {
@@ -235,5 +331,5 @@ app.listen(port, (error) => {
     console.log("Error" + error);
   }
 });
-//TODO: from 8:10:45
+//TODO: add onchange in form while login and signup
 //TODO: fix the routes in different folder

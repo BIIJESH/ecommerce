@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./ProductDisplay.css";
 import star_icon from "../Assets/star_icon.png";
 import star_dull_icon from "../Assets/star_dull_icon.png";
@@ -6,6 +6,25 @@ import { ShopContext } from "../../Context/ShopContext";
 const ProductDisplay = (props) => {
   const { product } = props;
   const { addToCart } = useContext(ShopContext);
+  const [category, setCategory] = useState("");
+  useEffect(() => {
+    // If product.category exists, you can just assign it to the category state.
+    if (product.category) {
+      setCategory(product.category); // Set category from the passed product data
+    } else {
+      // Optionally fetch category from an API if needed
+      fetch("http://localhost:4000/allproducts/:category")
+        .then((response) => response.json())
+        .then((data) => {
+          // Example if the data contains category
+          setCategory(data.category || "Unknown Category");
+        })
+        .catch((error) => {
+          console.error("Error fetching category", error);
+          setCategory("Unknown Category"); // Fallback in case of error
+        });
+    }
+  }, [product]);
   return (
     <div className="productdisplay">
       <div className="productdisplay-left">
@@ -61,7 +80,7 @@ const ProductDisplay = (props) => {
         </button>
         <p className="productdisplay-right-category">
           <span>Category : </span>
-          Women, T-shirt, Crop Top
+          {category || "Loading..."} {/* Display the category */}
         </p>
         <p className="productdisplay-right-category">
           <span>Tags : </span>
