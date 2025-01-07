@@ -3,69 +3,81 @@ import "./ListProduct.css";
 import cross_icon from "../../assets/cross_icon.png";
 
 const ListProduct = () => {
-  const [allproducts, setAllProducts] = useState([]);
+     const [allproducts, setAllProducts] = useState([]);
 
-  const fetchInfo = () => {
-    fetch('http://localhost:4000/allproducts')
-      .then((res) => res.json())
-      .then((data) => setAllProducts(data))
-      .catch((error) => console.error('Error fetching products:', error));
-  };
+     const fetchInfo = () => {
+          fetch("http://localhost:4000/allproducts")
+               .then((res) => res.json())
+               .then((data) => setAllProducts(data))
+               .catch((error) =>
+                    console.error("Error fetching products:", error)
+               );
+     };
 
-  useEffect(() => {
-    fetchInfo();
-  }, []);
+     useEffect(() => {
+          fetchInfo();
+     }, []);
 
-  const removeProduct = async (id) => {
-    await fetch('http://localhost:4000/removeproduct', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ id }),
-    });
+     const removeProduct = async (id) => {
+          await fetch("http://localhost:4000/removeproduct", {
+               method: "POST",
+               headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+               },
+               body: JSON.stringify({ id }),
+          });
 
-    fetch('http://localhost:4000/allproducts')
-      .then((res) => res.json())
-      .then((data) => setAllProducts(data))
-      .catch((error) => console.error('Error removing product:', error));
-  };
+          fetch("http://localhost:4000/allproducts")
+               .then((res) => res.json())
+               .then((data) => setAllProducts(data))
+               .catch((error) =>
+                    console.error("Error removing product:", error)
+               );
+     };
 
-  return (
-    <div className="listproduct">
-      <h1>All Products List</h1>
-      <div className="listproduct-format-main">
-        <p>Products</p>
-        <p>Title</p>
-        <p>Old Price</p>
-        <p>New Price</p>
-        <p>Category</p>
-        <p>Remove</p>
-      </div>
-      <div className="listproduct-allproducts">
-        <hr />
-        {allproducts.map((e) => (
-          <div key={e.id}>
-            <div className="listproduct-format-main listproduct-format">
-              <img className="listproduct-product-icon" src={e.image} alt="" />
-              <p>{e.name}</p>
-              <p>${e.old_price}</p>
-              <p>${e.new_price}</p>
-              <p>{e.category}</p>
-              <img
-                className="listproduct-remove-icon"
-                onClick={() => removeProduct(e.id)}
-                src={cross_icon}
-                alt=""
-              />
-            </div>
-            <hr />
+     return (
+          <div className="listproduct">
+               <h1>All Products List</h1>
+               <table className="listproduct-table">
+                    <thead>
+                         <tr>
+                              <th>Product</th>
+                              <th>Title</th>
+                              <th>Old Price</th>
+                              <th>New Price</th>
+                              <th>Category</th>
+                              <th>Remove</th>
+                         </tr>
+                    </thead>
+                    <tbody>
+                         {allproducts.map((e) => (
+                              <tr key={e.id}>
+                                   <td>
+                                        <img
+                                             className="listproduct-product-icon"
+                                             src={e.image}
+                                             alt=""
+                                        />
+                                   </td>
+                                   <td>{e.name}</td>
+                                   <td>${e.old_price}</td>
+                                   <td>${e.new_price}</td>
+                                   <td>{e.category}</td>
+                                   <td>
+                                        <img
+                                             className="listproduct-remove-icon"
+                                             onClick={() => removeProduct(e.id)}
+                                             src={cross_icon}
+                                             alt=""
+                                        />
+                                   </td>
+                              </tr>
+                         ))}
+                    </tbody>
+               </table>
           </div>
-        ))}
-      </div>
-    </div>
-  );
+     );
 };
 
 export default ListProduct;

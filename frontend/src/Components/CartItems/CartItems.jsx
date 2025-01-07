@@ -4,77 +4,102 @@ import { ShopContext } from "../../Context/ShopContext";
 import remove_icon from "../Assets/cart_cross_icon.png";
 
 const CartItems = () => {
-  const { getTotalCartAmount, all_product, cartItems, removeFromCart } =
-    useContext(ShopContext);
-  return (
-    <div className="cartitems">
-      <div className="cartitems-format-main">
-        <p>Products</p>
-        <p>Title</p>
-        <p>Price</p>
-        <p>Quantity</p>
-        <p>Total</p>
-        <p>Remove</p>
-      </div>
-      <hr />
-      {all_product.map((e) => {
-        if (cartItems[e.id] > 0) {
-          return (
-            <div key={all_product}>
-              <div className="cartitems-format cartitems-format-main">
-                <img src={e.image} alt="" className="carticon-product-icon" />
-                <p>{e.name}</p>
-                <p>${e.new_price}</p>
-                <button className="cartitems-quantity">
-                  {cartItems[e.id]}
-                </button>
-                <p>${e.new_price * cartItems[e.id]}</p>
-                <img
-                  className="cartitems-remove-icon"
-                  src={remove_icon}
-                  onClick={() => {
-                    removeFromCart(e.id);
-                  }}
-                  alt=""
-                />
-              </div>
-              <hr />
-            </div>
-          );
-        }
-        return null;
-      })}
-      <div className="cartitems-down">
-        <div className="cartitems-total">
-          <div>
-            <div className="cartitems-total-item">
-              <p>Subtotal</p>
-              <p>${getTotalCartAmount()}</p>
-            </div>
-            <hr />
-            <div className="cartitems-total-item">
-              <p>Shipping Fee</p>
-              <p>Free</p>
-            </div>
-            <hr />
-            <div className="cartitems-total-item">
-              <h3>Total</h3>
-              <h3>${getTotalCartAmount()}</h3>
-            </div>
+     const { getTotalCartAmount, all_product, cartItems, removeFromCart } =
+          useContext(ShopContext);
+     return (
+          <div className="container cartitems">
+               <table className="cartitems-table">
+                    <thead>
+                         <tr>
+                              <th>Products</th>
+                              <th>Title</th>
+                              <th>Price</th>
+                              <th>Quantity</th>
+                              <th>Total</th>
+                              <th>Remove</th>
+                         </tr>
+                    </thead>
+                    <tbody>
+                         {all_product.map((e) => {
+                              if (cartItems[e.id] > 0) {
+                                   return (
+                                        <tr key={e.id}>
+                                             <td>
+                                                  <img
+                                                       src={e.image}
+                                                       alt=""
+                                                       className="carticon-product-icon"
+                                                  />
+                                             </td>
+                                             <td>{e.name}</td>
+                                             <td>${e.new_price}</td>
+                                             <td>
+                                                  <button className="cartitems-quantity">
+                                                       {cartItems[e.id]}
+                                                  </button>
+                                             </td>
+                                             <td>
+                                                  $
+                                                  {e.new_price *
+                                                       cartItems[e.id]}
+                                             </td>
+                                             <td>
+                                                  <img
+                                                       className="cartitems-remove-icon"
+                                                       src={remove_icon}
+                                                       onClick={() => {
+                                                            removeFromCart(
+                                                                 e.id
+                                                            );
+                                                       }}
+                                                       alt=""
+                                                  />
+                                             </td>
+                                        </tr>
+                                   );
+                              }
+                              return null;
+                         })}
+                    </tbody>
+               </table>
+               <div className="cartitems-down">
+                    <div className="cartitems-total">
+                         <div>
+                              <div className="cartitems-total-item">
+                                   <p>Subtotal</p>
+                                   <p>${getTotalCartAmount()}</p>
+                              </div>
+                              <hr />
+                              <div className="cartitems-total-item">
+                                   <p>Shipping Fee</p>
+                                   <p>Free</p>
+                              </div>
+                              <hr />
+                              <div className="cartitems-total-item">
+                                   <h3>Total</h3>
+                                   <h3>${getTotalCartAmount()}</h3>
+                              </div>
+                         </div>
+                         <div className="checkout-wrap">
+                              <div className="cartitems-promocode">
+                                   <div className="cartitems-promobox">
+                                        <p>
+                                             If you have a promo code, Enter it
+                                             here
+                                        </p>
+                                        <input
+                                             type="text"
+                                             placeholder="promo code"
+                                        />
+                                        <button>Submit</button>
+                                   </div>
+                              </div>
+                              <button className="checkout-btn">PROCEED TO CHECKOUT</button>
+                         </div>
+                    </div>
+               </div>
           </div>
-          <button>PROCEED TO CHECKOUT</button>
-        </div>
-        <div className="cartitems-promocode">
-          <p>If you have a promo code, Enter it here</p>
-          <div className="cartitems-promobox">
-            <input type="text" placeholder="promo code" />
-            <button>Submit</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    //TODO:fix the responsiveness of cart page
-  );
+     );
 };
 
 export default CartItems;
