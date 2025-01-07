@@ -8,18 +8,96 @@ const LoginSignup = () => {
     password: "",
     email: "",
   });
+  const [suggestions, setSuggestions] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
 
-  const changeHandler = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const capitalizeFirstName = (value) => {
+    const nameParts = value.split(" ");
+    nameParts[0] = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
+    if (nameParts.length > 1) {
+      nameParts[1] =
+        nameParts[1].charAt(0).toUpperCase() + nameParts[1].slice(1);
+    }
+    return nameParts.join(" ");
   };
 
+  const validateUsername = (value) => {
+    const nameParts = value.trim().split(" ");
+    if (nameParts.length < 2 || nameParts.some((part) => part.trim() === "")) {
+      return "Please enter both a valid first and last name.";
+    }
+    return "";
+  };
+  const validateEmail = (value) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (value.trim() === "") {
+      return "Email address is required.";
+    }
+    if (!emailRegex.test(value)) {
+      return "Please provide a valid email address.";
+    }
+    return "";
+  };
+
+  const validatePassword = (value) => {
+    const passwordRules = [
+      {
+        regex: /.{8,}/,
+        message: "Password must be at least 8 characters long.",
+      },
+      {
+        regex: /[A-Z]/,
+        message: "Password must contain at least one uppercase letter.",
+      },
+      {
+        regex: /[a-z]/,
+        message: "Password must contain at least one lowercase letter.",
+      },
+      { regex: /\d/, message: "Password must contain at least one number." },
+      {
+        regex: /[!@#$%^&*]/,
+        message: "Password must contain at least one special character.",
+      },
+    ];
+
+    for (const rule of passwordRules) {
+      if (!rule.regex.test(value)) {
+        return rule.message;
+      }
+    }
+    return "";
+  };
+
+  const changeHandler = (e) => {
+    const { name, value } = e.target;
+
+    const updatedValue =
+      name === "username" ? capitalizeFirstName(value) : value;
+
+    setFormData({ ...formData, [name]: updatedValue });
+
+    let suggestion = "";
+    if (name === "username") {
+      suggestion = validateUsername(updatedValue);
+    } else if (name === "email") {
+      suggestion = validateEmail(value);
+    } else if (name === "password") {
+      suggestion = validatePassword(value);
+    }
+
+    setSuggestions((prev) => ({ ...prev, [name]: suggestion }));
+  };
   const login = async () => {
-    console.log("Login function executed", formData);
+    console.log("Login function executed")
+
     let responseData;
     await fetch("http://localhost:4000/login", {
       method: "POST",
       headers: {
-        Accept: "application/json", // Fixed the "Accept" header
+        Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
@@ -32,21 +110,27 @@ const LoginSignup = () => {
       });
 
     if (responseData && responseData.success) {
-      // If login is successful, save token and redirect
       localStorage.setItem("auth-token", responseData.token);
       window.location.replace("/");
     } else {
-      // If login fails, show the error message
-      alert(responseData?.errors || "An unknown error occurred. Please try again.");
+      alert(
+        responseData?.errors || "An unknown error occurred. Please try again.",
+      );
     }
-  };
 
+
+  };
   const signup = async () => {
+    if (Object.values(suggestions).some((msg) => msg)) {
+      alert("Please fix the errors before signing up.");
+      return;
+    }
+
     let responseData;
     await fetch("http://localhost:4000/signup", {
       method: "POST",
       headers: {
-        Accept: "application/json", // Fixed the "Accept" header
+        Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
@@ -62,11 +146,10 @@ const LoginSignup = () => {
       localStorage.setItem("auth-token", responseData.token);
       window.location.replace("/");
     } else {
-      // If signup fails, show the error message
-      alert(responseData?.errors || "An unknown error occurred. Please try again.");
+      alert(
+        responseData?.errors || "An unknown error occurred. Please try again.",
+      );
     }
-
-    console.log("SignUp function executed", formData);
   };
 
   return (
@@ -74,37 +157,51 @@ const LoginSignup = () => {
       <div className="loginsignup-container">
         <h1>{state}</h1>
         <div className="loginsignup-fields">
-          {state === "Sign Up" ? (
+          {state === "Sign Up" && (
+            <div>
+              <input
+                type="text"
+                placeholder="Your first and last name"
+                name="username"
+                value={formData.username}
+                onChange={changeHandler}
+              />
+              {suggestions.username && (
+                <p className="error">{suggestions.username}</p>
+              )}
+            </div>
+          )}
+          <div>
             <input
-              type="text"
-              placeholder="Your name"
-              name="username"
-              value={formData.username}
+              type="email"
+              placeholder="Email address"
+              name="email"
+              value={formData.email}
               onChange={changeHandler}
             />
-          ) : (
-            <></>
-          )}
-          <input
-            type="email"
-            placeholder="Email address"
-            name="email"
-            onChange={changeHandler}
-            value={formData.email}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            name="password"
-            value={formData.password}
-            onChange={changeHandler}
-          />
+            {suggestions.email && <p className="error">{suggestions.email}</p>}
+          </div>
+          <div>
+            <input
+              type="password"
+              placeholder="Password"
+              name="password"
+              value={formData.password}
+              onChange={changeHandler}
+            />
+            {suggestions.password && (
+              <p className="error">{suggestions.password}</p>
+            )}
+          </div>
         </div>
 
         <button
           onClick={() => {
             state === "Login" ? login() : signup();
           }}
+          disabled={
+            state === "Sign Up" && Object.values(suggestions).some((msg) => msg)
+          }
         >
           Continue
         </button>
@@ -132,11 +229,6 @@ const LoginSignup = () => {
             </span>
           </p>
         )}
-
-        <div className="loginsignup-agree">
-          <input type="checkbox" name="" id="" />
-          <p>By continuing, i agree to the terms of use & privacy policy.</p>
-        </div>
       </div>
     </div>
   );

@@ -92,6 +92,7 @@ app.post("/removeproduct", async (req, res) => {
   res.json({
     sucess: true,
     name: req.body.name,
+    
   });
 });
 //Creating api for getting all products
@@ -331,5 +332,3 @@ app.listen(port, (error) => {
     console.log("Error" + error);
   }
 });
-//TODO: add onchange in form while login and signup
-//TODO: fix the routes in different folder
