@@ -42,7 +42,7 @@ function App() {
       </BrowserRouter>
     </div>
   );
-  //TODO:from 4 : 11 :45
+  //TODO: make latest collection redirect to new collections
 }
 
 export default App;
