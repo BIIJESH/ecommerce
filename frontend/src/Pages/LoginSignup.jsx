@@ -6,12 +6,14 @@ const LoginSignup = () => {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
+    confirmPassword: "",
     email: "",
   });
   const [suggestions, setSuggestions] = useState({
     username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const capitalizeFirstName = (value) => {
@@ -72,12 +74,23 @@ const LoginSignup = () => {
     return "";
   };
 
+  const validateConfirmPassword = (password, confirmPassword) => {
+    if (confirmPassword.trim() === "") {
+      return "Please confirm your password.";
+    }
+    if (password !== confirmPassword) {
+      return "Passwords do not match.";
+    }
+    return "";
+  };
+
   const changeHandler = (e) => {
     const { name, value } = e.target;
 
     const updatedValue =
       name === "username" ? capitalizeFirstName(value) : value;
     setFormData({ ...formData, [name]: updatedValue });
+
     let suggestion = "";
     if (name === "username") {
       suggestion = validateUsername(updatedValue);
@@ -85,37 +98,10 @@ const LoginSignup = () => {
       suggestion = validateEmail(value);
     } else if (name === "password") {
       suggestion = validatePassword(value);
+    } else if (name === "confirmPassword") {
+      suggestion = validateConfirmPassword(formData.password, value);
     }
-
     setSuggestions((prev) => ({ ...prev, [name]: suggestion }));
-  };
-
-  const login = async () => {
-    console.log("Login function executed");
-    let responseData;
-    await fetch("http://localhost:4000/login", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => (responseData = data))
-      .catch((error) => {
-        console.error("Error during login:", error);
-        alert("An error occurred during login. Please try again later.");
-      });
-
-    if (responseData && responseData.success) {
-      localStorage.setItem("auth-token", responseData.token);
-      window.location.replace("/");
-    } else {
-      alert(
-        responseData?.errors || "An unknown error occurred. Please try again."
-      );
-    }
   };
 
   const signup = async () => {
@@ -197,6 +183,20 @@ const LoginSignup = () => {
               <p className="error">{suggestions.password}</p>
             )}
           </div>
+          {state === "Sign Up" && (
+            <div>
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={changeHandler}
+              />
+              {suggestions.confirmPassword && (
+                <p className="error">{suggestions.confirmPassword}</p>
+              )}
+            </div>
+          )}
         </div>
 
         <button
@@ -204,7 +204,8 @@ const LoginSignup = () => {
             state === "Login" ? login() : signup();
           }}
           disabled={
-            state === "Sign Up" && Object.values(suggestions).some((msg) => msg)
+            state === "Sign Up" &&
+            Object.values(suggestions).some((msg) => msg)
           }
         >
           Continue
