@@ -31,6 +31,7 @@ const LoginSignup = () => {
     }
     return "";
   };
+
   const validateEmail = (value) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (value.trim() === "") {
@@ -76,9 +77,7 @@ const LoginSignup = () => {
 
     const updatedValue =
       name === "username" ? capitalizeFirstName(value) : value;
-
     setFormData({ ...formData, [name]: updatedValue });
-
     let suggestion = "";
     if (name === "username") {
       suggestion = validateUsername(updatedValue);
@@ -90,9 +89,9 @@ const LoginSignup = () => {
 
     setSuggestions((prev) => ({ ...prev, [name]: suggestion }));
   };
-  const login = async () => {
-    console.log("Login function executed")
 
+  const login = async () => {
+    console.log("Login function executed");
     let responseData;
     await fetch("http://localhost:4000/login", {
       method: "POST",
@@ -114,18 +113,16 @@ const LoginSignup = () => {
       window.location.replace("/");
     } else {
       alert(
-        responseData?.errors || "An unknown error occurred. Please try again.",
+        responseData?.errors || "An unknown error occurred. Please try again."
       );
     }
-
-
   };
+
   const signup = async () => {
     if (Object.values(suggestions).some((msg) => msg)) {
       alert("Please fix the errors before signing up.");
       return;
     }
-
     let responseData;
     await fetch("http://localhost:4000/signup", {
       method: "POST",
@@ -147,9 +144,16 @@ const LoginSignup = () => {
       window.location.replace("/");
     } else {
       alert(
-        responseData?.errors || "An unknown error occurred. Please try again.",
+        responseData?.errors || "An unknown error occurred. Please try again."
       );
     }
+  };
+
+  const handleStateChange = (newState) => {
+    if (newState === "Sign Up" && suggestions.email) {
+      setFormData((prev) => ({ ...prev, email: "" }));
+    }
+    setState(newState);
   };
 
   return (
@@ -211,7 +215,7 @@ const LoginSignup = () => {
             Create an account?{" "}
             <span
               onClick={() => {
-                setState("Sign Up");
+                handleStateChange("Sign Up");
               }}
             >
               Click here
@@ -222,7 +226,7 @@ const LoginSignup = () => {
             Already have an account?{" "}
             <span
               onClick={() => {
-                setState("Login");
+                handleStateChange("Login");
               }}
             >
               Login here
