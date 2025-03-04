@@ -104,6 +104,38 @@ const LoginSignup = () => {
     setSuggestions((prev) => ({ ...prev, [name]: suggestion }));
   };
 
+  const login = async () => {
+    if (Object.values(suggestions).some((msg) => msg)) {
+      alert("Please fix the errors before logging in.");
+      return;
+    }
+
+    let responseData;
+    await fetch("http://localhost:4000/login", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => (responseData = data))
+      .catch((error) => {
+        console.error("Error during login:", error);
+        alert("An error occurred during login. Please try again later.");
+      });
+
+    if (responseData && responseData.success) {
+      localStorage.setItem("auth-token", responseData.token);
+      window.location.replace("/");
+    } else {
+      alert(
+        responseData?.errors || "Invalid credentials. Please try again."
+      );
+    }
+  };
+
   const signup = async () => {
     if (Object.values(suggestions).some((msg) => msg)) {
       alert("Please fix the errors before signing up.");
